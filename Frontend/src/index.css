@@ -57,11 +57,13 @@ body {
 }
 
 #root {
-  width: 1126px;
+  width: 100%;
+  /* Fixed width hata kar 100% karein */
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
+  /* Auto margin ki zaroorat nahi */
   text-align: center;
-  border-inline: 1px solid var(--border);
+  /* border-inline: 1px solid var(--border);  <-- Is line ko hata dein ya comment karein */
   min-height: 100svh;
   display: flex;
   flex-direction: column;
