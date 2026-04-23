@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import InputField from "../components/InputField";
-import GameButton from "../components/GameButton";
+import InputField from "../components/home/InputField";
+import GameButton from "../components/home/GameButton";
 
 const Home = () => {
   const [player1, setPlayer1] = useState("");

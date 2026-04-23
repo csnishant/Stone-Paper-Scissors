@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import ChoiceCard from "../components/ChoiceCard";
+
 import { GAME_API_ENDPOINT } from "../src/utils/constants";
+import ChoiceCard from "../components/game/ChoiceCard";
 
 const GamePage = () => {
   const { state } = useLocation();
