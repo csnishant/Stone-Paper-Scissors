@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
-import { RefreshCw, Trophy, Swords } from "lucide-react";
+import { RefreshCw, Trophy, Swords, Zap } from "lucide-react";
 
 // Assets
 import stoneHand from "../src/assets/stoneHand.png";
 import paperHand from "../src/assets/paperHand.png";
 import scissorHand from "../src/assets/scissorHand.png";
-
-import { GAME_API_ENDPOINT } from "../src/utils/constants";
 
 const GamePage = () => {
   const { state } = useLocation();
@@ -20,7 +17,7 @@ const GamePage = () => {
   const [p2Choice, setP2Choice] = useState(null);
   const [isFighting, setIsFighting] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [winnerName, setWinnerName] = useState("");
+  const [roundWinner, setRoundWinner] = useState(null); // 'P1', 'P2', or 'DRAW'
   const [scores, setScores] = useState({ p1: 0, p2: 0 });
 
   const weaponAssets = {
@@ -29,7 +26,6 @@ const GamePage = () => {
     scissors: scissorHand,
   };
 
-  // Auto-trigger fight when both select
   useEffect(() => {
     if (p1Choice && p2Choice && !isFighting) {
       handleFight();
@@ -39,6 +35,7 @@ const GamePage = () => {
   const handleFight = () => {
     setIsFighting(true);
 
+    // Battle logic after animation delay
     setTimeout(() => {
       const determineWinner = (c1, c2) => {
         if (c1 === c2) return "DRAW";
@@ -52,23 +49,20 @@ const GamePage = () => {
       };
 
       const result = determineWinner(p1Choice, p2Choice);
-      if (result === "P1") {
-        setScores((prev) => ({ ...prev, p1: prev.p1 + 1 }));
-        setWinnerName(state?.player1 || "PLAYER 1");
-      } else if (result === "P2") {
-        setScores((prev) => ({ ...prev, p2: prev.p2 + 1 }));
-        setWinnerName(state?.player2 || "PLAYER 2");
-      } else {
-        setWinnerName("DRAW!");
-      }
+      setRoundWinner(result);
+
+      if (result === "P1") setScores((prev) => ({ ...prev, p1: prev.p1 + 1 }));
+      if (result === "P2") setScores((prev) => ({ ...prev, p2: prev.p2 + 1 }));
+
       setShowResult(true);
-    }, 600);
+    }, 800);
   };
 
   const nextRound = () => {
     setShowResult(false);
     setIsFighting(false);
-    if (round < 6) {
+    setRoundWinner(null);
+    if (round < 5) {
       setRound(round + 1);
       setP1Choice(null);
       setP2Choice(null);
@@ -82,123 +76,178 @@ const GamePage = () => {
   };
 
   return (
-    <div className="h-screen bg-[#0d0f16] text-white flex flex-col overflow-hidden font-sans select-none">
-      {/* --- OPPONENT SIDE (NORTH) --- */}
+    <div className="h-screen bg-[#08090d] text-white flex flex-col overflow-hidden font-sans relative">
+      {/* Background Glows */}
       <div
-        className={`flex-1 relative flex flex-col items-center justify-start pt-6 transition-all duration-500 ${p2Choice ? "bg-pink-500/10" : ""}`}>
-        <div className="rotate-180 flex flex-col items-center z-10">
-          <h2 className="text-2xl font-black text-pink-500">
-            {state?.player2 || "Player 2"}
+        className={`absolute inset-0 transition-opacity duration-1000 opacity-20 ${p1Choice ? "bg-cyan-500" : ""}`}
+      />
+      <div
+        className={`absolute inset-0 transition-opacity duration-1000 opacity-20 ${p2Choice ? "bg-pink-500" : ""}`}
+      />
+
+      {/* --- P2 SIDE --- */}
+      <div className="flex-1 flex flex-col items-center justify-start pt-12 relative">
+        <div className="rotate-180 text-center z-10">
+          <p className="text-pink-500 font-black tracking-widest text-sm uppercase opacity-60">
+            Opponent
+          </p>
+          <h2 className="text-3xl font-black text-pink-500 mt-1">
+            {state?.player2 || "PLAYER 2"}
           </h2>
-          <span className="text-4xl font-mono text-pink-500/50">
+          <div className="text-5xl font-mono text-pink-500/30 font-black">
             {scores.p2}
-          </span>
+          </div>
         </div>
 
-        <motion.img
-          key={p2Choice || "waiting2"}
-          initial={{ y: -50, opacity: 0 }}
-          animate={{
-            y: isFighting ? 160 : 0,
-            opacity: p2Choice ? 1 : 0.3,
-            scale: isFighting ? 1.4 : 1,
-            rotate: 180,
-          }}
-          src={weaponAssets[p2Choice] || stoneHand}
-          className="w-64 h-64 md:w-80 md:h-80 object-contain absolute top-32 drop-shadow-[0_20px_50px_rgba(236,72,153,0.3)]"
-        />
+        <AnimatePresence>
+          <motion.img
+            key={p2Choice || "p2-idle"}
+            initial={{ y: -100, opacity: 0, rotate: 180 }}
+            animate={{
+              y: isFighting ? 180 : 20,
+              opacity: p2Choice ? 1 : 0.2,
+              scale: isFighting ? 1.2 : 1,
+              rotate: 180,
+            }}
+            transition={{ type: "spring", stiffness: 100 }}
+            src={weaponAssets[p2Choice] || stoneHand}
+            className="w-56 h-56 md:w-72 md:h-72 object-contain absolute top-40 drop-shadow-[0_0_40px_rgba(236,72,153,0.4)]"
+          />
+        </AnimatePresence>
 
-        {/* P2 SELECTION */}
-        <div className="absolute top-4 right-4 flex flex-col gap-4 rotate-180">
+        {/* P2 Selection HUD */}
+        <div className="absolute top-10 right-6 flex flex-col gap-3 rotate-180">
           {Object.keys(weaponAssets).map((type) => (
             <button
               key={type}
               onClick={() => !isFighting && setP2Choice(type)}
-              className={`p-4 rounded-3xl border-4 transition-all ${p2Choice === type ? "border-pink-500 bg-pink-500" : "border-white/10 bg-white/5"}`}>
-              <img
-                src={weaponAssets[type]}
-                className="w-12 h-12 object-contain"
-              />
+              className={`p-3 rounded-2xl border-2 transition-all ${p2Choice === type ? "border-pink-500 bg-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.5)]" : "border-white/5 bg-white/5 opacity-40 hover:opacity-100"}`}>
+              <img src={weaponAssets[type]} className="w-8 h-8" alt={type} />
             </button>
           ))}
         </div>
       </div>
 
-      {/* --- BATTLE DIVIDER --- */}
-      <div className="h-1 bg-white/10 flex items-center justify-center relative z-50">
-        <div className="absolute bg-white text-black font-black px-10 py-2 rounded-full text-xl shadow-2xl">
-          RD {round}
-        </div>
+      {/* --- DIVIDER & ROUND INFO --- */}
+      <div className="h-2 bg-gradient-to-r from-transparent via-white/20 to-transparent flex items-center justify-center relative z-50">
+        <motion.div
+          animate={isFighting ? { scale: [1, 1.2, 1] } : {}}
+          className="bg-white text-black font-black px-8 py-2 rounded-xl italic text-2xl shadow-2xl border-4 border-black">
+          ROUND {round}
+        </motion.div>
       </div>
 
-      {/* --- YOUR SIDE (SOUTH) --- */}
-      <div
-        className={`flex-1 relative flex flex-col items-center justify-end pb-6 transition-all duration-500 ${p1Choice ? "bg-cyan-500/10" : ""}`}>
+      {/* --- P1 SIDE --- */}
+      <div className="flex-1 flex flex-col items-center justify-end pb-12 relative">
         <motion.img
-          key={p1Choice || "waiting1"}
-          initial={{ y: 50, opacity: 0 }}
+          key={p1Choice || "p1-idle"}
+          initial={{ y: 100, opacity: 0 }}
           animate={{
-            y: isFighting ? -160 : 0,
-            opacity: p1Choice ? 1 : 0.3,
-            scale: isFighting ? 1.4 : 1,
+            y: isFighting ? -180 : -20,
+            opacity: p1Choice ? 1 : 0.2,
+            scale: isFighting ? 1.2 : 1,
           }}
+          transition={{ type: "spring", stiffness: 100 }}
           src={weaponAssets[p1Choice] || stoneHand}
-          className="w-64 h-64 md:w-80 md:h-80 object-contain absolute bottom-32 drop-shadow-[0_-20px_50px_rgba(34,211,238,0.3)]"
+          className="w-56 h-56 md:w-72 md:h-72 object-contain absolute bottom-40 drop-shadow-[0_0_40px_rgba(34,211,238,0.4)]"
         />
 
-        {/* P1 SELECTION */}
-        <div className="absolute bottom-4 left-4 flex flex-col gap-4">
+        {/* P1 Selection HUD */}
+        <div className="absolute bottom-10 left-6 flex flex-col gap-3">
           {Object.keys(weaponAssets).map((type) => (
             <button
               key={type}
               onClick={() => !isFighting && setP1Choice(type)}
-              className={`p-4 rounded-3xl border-4 transition-all ${p1Choice === type ? "border-cyan-400 bg-cyan-400" : "border-white/10 bg-white/5"}`}>
-              <img
-                src={weaponAssets[type]}
-                className="w-12 h-12 object-contain"
-              />
+              className={`p-3 rounded-2xl border-2 transition-all ${p1Choice === type ? "border-cyan-400 bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.5)]" : "border-white/5 bg-white/5 opacity-40 hover:opacity-100"}`}>
+              <img src={weaponAssets[type]} className="w-8 h-8" alt={type} />
             </button>
           ))}
         </div>
 
-        <div className="flex flex-col items-center z-10">
-          <span className="text-4xl font-mono text-cyan-400/50">
+        <div className="text-center z-10">
+          <div className="text-5xl font-mono text-cyan-400/30 font-black">
             {scores.p1}
-          </span>
-          <h2 className="text-2xl font-black text-cyan-400">
-            {state?.player1 || "You"}
+          </div>
+          <h2 className="text-3xl font-black text-cyan-400 mt-1">
+            {state?.player1 || "YOU"}
           </h2>
+          <p className="text-cyan-400 font-black tracking-widest text-sm uppercase opacity-60">
+            Challenger
+          </p>
         </div>
       </div>
 
-      {/* --- RESULT OVERLAY --- */}
+      {/* --- WINNER OVERLAY (MODAL) --- */}
       <AnimatePresence>
         {showResult && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="absolute inset-0 z-[100] bg-[#0d0f16]/95 backdrop-blur-2xl flex flex-col items-center justify-center p-8">
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6">
+            {/* Winner's Weapon Show-off */}
             <motion.div
-              initial={{ y: 20 }}
-              animate={{ y: 0 }}
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1, rotate: 0 }}
+              className="relative mb-8">
+              <div
+                className={`absolute inset-0 blur-[100px] rounded-full ${roundWinner === "P1" ? "bg-cyan-500/50" : roundWinner === "P2" ? "bg-pink-500/50" : "bg-yellow-500/30"}`}
+              />
+              <img
+                src={
+                  roundWinner === "P2"
+                    ? weaponAssets[p2Choice]
+                    : weaponAssets[p1Choice]
+                }
+                className={`w-64 h-64 object-contain relative z-10 ${roundWinner === "P2" ? "rotate-180" : ""}`}
+                alt="Winner Weapon"
+              />
+              {roundWinner === "DRAW" && (
+                <img
+                  src={weaponAssets[p2Choice]}
+                  className="w-48 h-48 object-contain absolute top-0 left-20 opacity-50 rotate-180"
+                />
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
               className="text-center">
-              <Trophy className="mx-auto text-yellow-400 mb-4" size={80} />
-              <h1 className="text-6xl font-black text-white italic mb-2 tracking-tighter">
-                {winnerName}
+              <h3 className="text-2xl font-bold text-white/50 uppercase tracking-[0.3em] mb-2">
+                Winner
+              </h3>
+              <h1
+                className={`text-7xl font-black italic mb-8 tracking-tighter ${roundWinner === "P1" ? "text-cyan-400" : roundWinner === "P2" ? "text-pink-500" : "text-yellow-400"}`}>
+                {roundWinner === "P1"
+                  ? state?.player1 || "PLAYER 1"
+                  : roundWinner === "P2"
+                    ? state?.player2 || "PLAYER 2"
+                    : "IT'S A DRAW!"}
               </h1>
-              <p className="text-white/40 font-bold tracking-widest uppercase mb-12">
-                Round {round} Completed
-              </p>
 
               <button
                 onClick={nextRound}
-                className="bg-yellow-400 text-black px-20 py-6 rounded-full font-black text-3xl shadow-[0_10px_0_#b45309] active:translate-y-2 active:shadow-none transition-all flex items-center gap-4">
-                CONTINUE <RefreshCw size={32} />
+                className="group relative bg-white text-black px-16 py-5 rounded-2xl font-black text-2xl transition-all hover:scale-105 active:scale-95 overflow-hidden">
+                <span className="relative z-10 flex items-center gap-3">
+                  {round < 5 ? "NEXT ROUND" : "SEE FINAL RESULT"}{" "}
+                  <RefreshCw className="group-hover:rotate-180 transition-transform duration-500" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Background Particles/Flash effect */}
+      {isFighting && !showResult && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 1, 0] }}
+          className="absolute inset-0 bg-white z-[60] pointer-events-none"
+        />
+      )}
     </div>
   );
 };
