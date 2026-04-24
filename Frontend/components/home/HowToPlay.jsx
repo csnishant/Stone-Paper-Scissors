@@ -1,68 +1,42 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  Hand,
-  ChevronLeft,
-  Zap,
-  Star,
-  Trophy,
-  Circle,
-  StickyNote,
-  Scissors,
-} from "lucide-react";
+import { ChevronLeft, Trophy, Hand, Zap, Star } from "lucide-react";
+
+// Image Assets Import (Inhe apne path ke hisaab se adjust karein)
+import RockWinImg from "../../src/assets/stone.png";
+import PaperWinImg from "../../src/assets/paper.png";
+import ScissorsWinImg from "../../src/assets/scissor.png";
 
 const HowToPlay = () => {
   const navigate = useNavigate();
 
-  const steps = [
-    {
-      id: 1,
-      title: "Choose Your Move!",
-      desc: "Pick Stone, Paper, or Scissors in your head.",
-      icon: <Hand className="text-pink-400" size={40} />,
-      color: "from-pink-500/20 to-purple-500/20",
-    },
-    {
-      id: 2,
-      title: "Count Together!",
-      desc: "Shout '1, 2, 3... SHOOT!' with your friend.",
-      icon: <Zap className="text-yellow-400" size={40} />,
-      color: "from-yellow-500/20 to-orange-500/20",
-    },
-    {
-      id: 3,
-      title: "Reveal!",
-      desc: "Show your hand at the exact same time!",
-      icon: <Star className="text-cyan-400" size={40} />,
-      color: "from-cyan-500/20 to-blue-500/20",
-    },
-  ];
-
   const rules = [
     {
+      title: "Rock Smashes Scissors",
+      image: RockWinImg,
       winner: "Stone",
       beats: "Scissors",
-      icon: <Circle size={32} fill="currentColor" />,
-      color: "bg-slate-500",
+      color: "border-blue-500 shadow-blue-500/20",
     },
     {
+      title: "Scissors Cuts Paper",
+      image: ScissorsWinImg,
       winner: "Scissors",
       beats: "Paper",
-      icon: <Scissors size={32} />,
-      color: "bg-pink-500",
+      color: "border-pink-500 shadow-pink-500/20",
     },
     {
+      title: "Paper Covers Rock",
+      image: PaperWinImg,
       winner: "Paper",
       beats: "Stone",
-      icon: <StickyNote size={32} fill="currentColor" />,
-      color: "bg-blue-400",
+      color: "border-yellow-500 shadow-yellow-500/20",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#1a1625] text-white p-6 font-sans overflow-x-hidden">
-      {/* Navigation */}
+    <div className="min-h-screen bg-[#1a1625] text-white p-6 font-sans">
       <motion.button
         whileHover={{ x: -5 }}
         onClick={() => navigate("/")}
@@ -70,111 +44,64 @@ const HowToPlay = () => {
         <ChevronLeft /> Back to Game
       </motion.button>
 
-      {/* Title Section */}
-      <div className="text-center mb-12">
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="inline-block mb-4">
-          <span className="text-6xl">✊📄✂️</span>
-        </motion.div>
-        <h1 className="text-4xl md:text-5xl font-black italic tracking-tight">
-          HOW TO <span className="text-yellow-400">PLAY</span>
-        </h1>
-        <p className="text-slate-400 mt-2 font-bold">
-          The Ultimate Guide for Heroes!
-        </p>
-      </div>
+      <div className="max-w-5xl mx-auto space-y-12">
+        <header className="text-center">
+          <h1 className="text-5xl font-black italic tracking-tighter">
+            GAME <span className="text-yellow-400">RULES</span>
+          </h1>
+        </header>
 
-      <div className="max-w-4xl mx-auto space-y-12">
-        {/* Step-by-Step */}
-        <section>
-          <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
-            <span className="bg-yellow-400 text-black px-3 py-1 rounded-lg">
-              3
-            </span>{" "}
-            EASY STEPS
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className={`bg-gradient-to-br ${step.color} border-2 border-white/10 p-6 rounded-[32px] relative overflow-hidden group`}>
-                <div className="mb-4">{step.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                  {step.desc}
-                </p>
-                <div className="absolute -bottom-4 -right-4 text-white/5 font-black text-8xl italic">
-                  {step.id}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        {/* Win/Lose Rules Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {rules.map((rule, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              whileHover={{ y: -10 }}
+              className={`bg-[#2a2438] rounded-[32px] overflow-hidden border-2 ${rule.color} shadow-xl`}>
+              <img
+                src={rule.image}
+                alt={rule.title}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-6 text-center">
+                <h3 className="text-xl font-black text-white uppercase italic">
+                  <span className="text-yellow-400">{rule.winner}</span> Beats{" "}
+                  {rule.beats}
+                </h3>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-        {/* Rules Section */}
-        <section className="bg-[#2a2438] p-8 rounded-[40px] border-b-8 border-black/30">
-          <h2 className="text-2xl font-black mb-8 text-center">WHO WINS? 🏆</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {rules.map((rule, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.05, rotate: index % 2 === 0 ? 2 : -2 }}
-                className="flex flex-col items-center text-center space-y-4">
-                <div className={`${rule.color} p-6 rounded-full shadow-lg`}>
-                  {rule.icon}
-                </div>
-                <div className="font-bold">
-                  <span className="text-yellow-400">{rule.winner}</span>
-                  <p className="text-xs text-slate-400 mt-1 uppercase tracking-widest">
-                    Smashingly beats
-                  </p>
-                  <span className="text-white">{rule.beats}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Tips Section */}
-        <section className="grid md:grid-cols-2 gap-6">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-emerald-500/10 border-2 border-emerald-500/20 p-6 rounded-3xl flex items-center gap-4">
-            <div className="bg-emerald-500 p-3 rounded-2xl">🤝</div>
-            <div>
-              <h4 className="font-bold text-emerald-400">Play Fair!</h4>
-              <p className="text-sm text-slate-300">
-                Always shake hands after a match.
-              </p>
+        {/* Draw Rule Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-gray-800 to-slate-900 p-8 rounded-[40px] border-2 border-white/10 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex gap-4 text-4xl">
+              <span>✊</span> <span>vs</span> <span>✊</span>
             </div>
-          </motion.div>
+            <h2 className="text-3xl font-black italic">
+              IT'S A <span className="text-cyan-400">DRAW!</span>
+            </h2>
+            <p className="text-slate-400 max-w-md mx-auto">
+              Agar dono players ne same sign dikhaya (e.g., Rock vs Rock), toh
+              match tie ho jata hai. Aise mein round ko **Rematch** karein!
+            </p>
+          </div>
+        </motion.section>
 
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-purple-500/10 border-2 border-purple-500/20 p-6 rounded-3xl flex items-center gap-4">
-            <div className="bg-purple-500 p-3 rounded-2xl">🔥</div>
-            <div>
-              <h4 className="font-bold text-purple-400">Best of Three!</h4>
-              <p className="text-sm text-slate-300">
-                Play 3 rounds to find the true champion.
-              </p>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* CTA Button */}
-        <div className="text-center pt-8">
+        {/* Footer CTA */}
+        <div className="flex justify-center pb-10">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => navigate("/")}
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black text-2xl px-12 py-5 rounded-full shadow-[0_6px_0_#9a3412] flex items-center gap-3 mx-auto">
-            <Trophy /> GOT IT! LET'S PLAY
+            className="bg-yellow-400 text-black font-black text-2xl px-12 py-5 rounded-full shadow-[0_6px_0_#b45309] active:translate-y-1 active:shadow-none transition-all flex items-center gap-3">
+            <Trophy size={28} /> READY TO BATTLE?
           </motion.button>
         </div>
       </div>
