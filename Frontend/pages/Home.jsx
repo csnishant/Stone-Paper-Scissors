@@ -11,11 +11,12 @@ import {
   Star,
   Trophy,
 } from "lucide-react";
+import HowToPlay from "../components/home/HowToPlay";
 
 const Home = () => {
   const [player1, setPlayer1] = useState("");
   const [player2, setPlayer2] = useState("");
-  const [showRules, setShowRules] = useState(false);
+
   const navigate = useNavigate();
 
   const handleStartGame = () => {
@@ -102,73 +103,15 @@ const Home = () => {
                 className="bg-[#413b52] text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-2 border-b-4 border-black/20">
                 <History size={18} className="text-purple-400" /> Logs
               </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                onClick={() => setShowRules(true)}
-                className="bg-[#413b52] text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-2 border-b-4 border-black/20">
-                <HelpCircle size={18} className="text-yellow-400" /> Rules
-              </motion.button>
+              <button onClick={() => navigate("/rules")} className="btn-style">
+                How To Play
+              </button>
             </div>
           </div>
         </div>
       </motion.div>
 
       {/* --- How To Play Modal --- */}
-      <AnimatePresence>
-        {showRules && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              className="bg-white rounded-[40px] w-full max-w-sm p-8 text-slate-800 relative">
-              <button
-                onClick={() => setShowRules(false)}
-                className="absolute top-6 right-6 bg-slate-100 p-2 rounded-full hover:bg-red-100 hover:text-red-500 transition-colors">
-                <X size={24} />
-              </button>
-
-              <h2 className="text-3xl font-black mb-6 text-indigo-600 italic">
-                HOW TO PLAY
-              </h2>
-
-              <div className="space-y-6">
-                {[
-                  {
-                    icon: "🪨",
-                    text: "Rock breaks Scissors",
-                    color: "bg-orange-100",
-                  },
-                  {
-                    icon: "📄",
-                    text: "Paper covers Rock",
-                    color: "bg-blue-100",
-                  },
-                  {
-                    icon: "✂️",
-                    text: "Scissors cut Paper",
-                    color: "bg-pink-100",
-                  },
-                ].map((rule, i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <span className={`text-3xl p-3 rounded-2xl ${rule.color}`}>
-                      {rule.icon}
-                    </span>
-                    <p className="font-bold text-lg">{rule.text}</p>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => setShowRules(false)}
-                className="w-full mt-8 bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-[0_5px_0_#4338ca]">
-                OKAY, LET'S GO!
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
